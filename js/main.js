@@ -60,3 +60,70 @@ if (video) {
   );
   videoObserver.observe(video);
 }
+
+// ============================================================
+// Language toggle (EN / ქართული)
+// Translatable chrome carries a data-ka attribute holding the
+// Georgian markup; the English source stays in the element and is
+// captured on load. Product descriptions are translated via the
+// dictionary below, keyed by the card's English product name.
+// ============================================================
+const PRODUCT_DESC_EN = {
+  'Cheesecake': 'Cream cheese filling on a biscuit base',
+  'Honey Cake': 'Honey layers with condensed-milk cream',
+  'Almond Cake': 'Almond-flour layers with buttercream',
+  'Paris-Brest': 'Choux pastry with praline cream',
+  'Napoleon': 'Classic Napoleon with pastry cream (2 portions)',
+  'Choux Classic': 'French choux with custard cream',
+  'Eclair': 'Eclair with custard cream and a milk-chocolate glaze',
+  'Carrot Cake': 'Carrot cake with walnuts and cream-cheese frosting',
+  'Apple Cake': 'Apple cake with cinnamon (vegan)',
+  'Brownie': 'Brownie with chocolate chunks and hazelnuts',
+  'Zebra Cake': 'Zebra loaf with hazelnuts and milk chocolate',
+  'Cinnamon Rolls': 'Cinnamon roll with cream-cheese frosting',
+  'Truffle Cookies': 'Butter cookies rolled in cocoa',
+  'Tiramisu': 'Classic Italian tiramisu with mascarpone cream',
+  'Pistachio Tiramisu': 'Tiramisu with mascarpone and pistachio cream',
+};
+
+(() => {
+  const translatable = document.querySelectorAll('[data-ka]');
+  // capture the English source once
+  translatable.forEach((el) => { el.dataset.en = el.innerHTML; });
+
+  // product descriptions: capture Georgian (in markup) + map English by name
+  const descs = [...document.querySelectorAll('.product-grid .card .desc')];
+  descs.forEach((d) => {
+    d.dataset.ka = d.innerHTML;
+    const h3 = d.closest('.card').querySelector('h3');
+    const name = h3 && h3.firstChild ? h3.firstChild.textContent.trim() : '';
+    d.dataset.en = PRODUCT_DESC_EN[name] || d.innerHTML;
+  });
+
+  const buttons = document.querySelectorAll('.lang-btn');
+
+  const apply = (lang) => {
+    document.documentElement.lang = lang;
+    translatable.forEach((el) => {
+      el.innerHTML = lang === 'ka' ? el.dataset.ka : el.dataset.en;
+    });
+    descs.forEach((d) => {
+      d.innerHTML = lang === 'ka' ? d.dataset.ka : d.dataset.en;
+      d.lang = lang;
+    });
+    buttons.forEach((b) => {
+      const active = b.dataset.lang === lang;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+    try { localStorage.setItem('kopines-lang', lang); } catch (e) {}
+  };
+
+  // default: saved choice → browser language → English
+  let initial = 'en';
+  try { initial = localStorage.getItem('kopines-lang'); } catch (e) {}
+  if (!initial) initial = (navigator.language || '').toLowerCase().startsWith('ka') ? 'ka' : 'en';
+
+  buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.lang)));
+  apply(initial);
+})();
