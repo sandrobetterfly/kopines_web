@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+
+# Node (if tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Source / working files (not part of the deployed site)
+*.mov
+*.psd
+*.ai
+*.sketch
